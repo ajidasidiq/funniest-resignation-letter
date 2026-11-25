@@ -17,17 +17,21 @@ def main() -> None:
     import os
 
     # Gate self-check, mirroring the sealed scorer: UTF-8 text of 1-140
-    # characters, not only white space, a single line.
+    # characters, not only white space, a single line, printable only.
     assert 1 <= len(LINE) <= 140, "line must be 1-140 characters"
     assert LINE.strip(), "line must not be only white space"
     assert "\n" not in LINE and "\r" not in LINE, "line must be a single line"
+    assert LINE.isprintable(), "line must contain only printable characters"
 
-    os.makedirs("/output", exist_ok=True)
-    with open("/output/entry.txt", "w", encoding="utf-8") as f:
+    out_path = os.environ.get("OUTPUT_PATH", "/output/entry.txt")
+    out_dir = os.path.dirname(out_path)
+    if out_dir:
+        os.makedirs(out_dir, exist_ok=True)
+    with open(out_path, "w", encoding="utf-8") as f:
         f.write(LINE)
 
     # Post-write byte-exact re-read: what was written is the line, nothing else.
-    with open("/output/entry.txt", "r", encoding="utf-8") as f:
+    with open(out_path, "r", encoding="utf-8") as f:
         assert f.read() == LINE, "written output differs from the line"
 
 
